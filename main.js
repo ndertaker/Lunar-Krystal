@@ -131,7 +131,18 @@ global.getText = function (...args) {
 
 try {
     var appStateFile = resolve(join(global.client.mainPath, global.config.APPSTATEPATH || "appstate.json"));
-    var appState = process.env.appstate ? JSON.parse(process.env.appstate) : require(appStateFile);
+    var appState;
+    if (fs.existsSync(appStateFile)) {
+        appState = require(appStateFile);
+    } else {
+        if (process.env.appstate) {
+            appState = JSON.parse(process.env.appstate);
+        } else {
+            throw new Error("appstate.json file not found and APPSTATE environment variable is not set");
+        }
+    }
+} catch (error) {
+    console.error("Error loading appState:", error);
 }
 ////////////////////////////////////////////////////////////
 //========= Login account and start Listen Event =========//
