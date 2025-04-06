@@ -23,9 +23,6 @@ app.listen(PORT, () => {
     console.log(`[ SECURITY ] -> Máy chủ khởi động tại port: ${PORT}`);
 });
 
-
-const { spawn } = require("child_process");
-
 function startBot(message, restartLimit = 5) {
     // Ghi log nếu có message
     if (message) {
