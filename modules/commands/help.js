@@ -1,83 +1,110 @@
+const fs = require('fs'); // Thêm dòng này để import fs
+
 module.exports.config = {
-  name: "help",
-  version: "1.0.0",
-  hasPermssion: 0,
-  credits: "Mirai",
-  description: "Hướng dẫn cho người mới",
-  commandCategory: "Danh sách lệnh",
-  usages: "[Tên module]",
-  cooldowns: 5,
-  envConfig: {
-    autoUnsend: true,
-    delayUnsend: 60
-  }
+    name: "help",
+    version: "1.1.1",
+    hasPermssion: 0,
+    credits: "DC-Nam", // mod lại by táo táo
+    description: "Xem danh sách lệnh và info",
+    commandCategory: "Danh sách lệnh",
+    usages: "[tên lệnh/all]",
+    cooldowns: 5
 };
 
 module.exports.languages = {
-  "vi": {
-    "moduleInfo": "╭───╮\n    %1\n╰───╯ \n📜Mô tả: %2\n\n» 🧞Credit: %7\n» 📄Hướng dẫn cách dùng: %3\n» 🌟Thuộc nhóm: %4\n» ⏱Thời gian chờ: %5 giây(s)\n» 👥Quyền hạn: %6\n✎﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏\n💥💢💥 Điều Hành Bởi JRT 💥💢💥",
-    "helpList": '≻─────── •👇🏻• ───────≺\n🏰🏰🏰 𝐻𝑖𝑒̣̂𝑛 𝑡𝑎̣𝑖 đ𝑎𝑛𝑔 𝑐𝑜́ %1 𝑙𝑒̣̂𝑛ℎ 𝑐𝑜́ 𝑡ℎ𝑒̂̉ 𝑠𝑢̛̉ 𝑑𝑢̣𝑛𝑔 𝑡𝑟𝑒̂𝑛 𝑏𝑜𝑡 𝑛𝑎̀𝑦\n🌟𝑆𝑢̛̉ 𝑑𝑢̣𝑛𝑔: "%2giupdo + tên lệnh" đ𝑒̂̉ 𝑏𝑖𝑒̂́𝑡 𝑐𝑎́𝑐ℎ 𝑠𝑢̛̉ 𝑑𝑢̣𝑛𝑔 𝑙𝑒̣̂𝑛ℎ\n🤖𝐵𝑜𝑡 đ𝑢̛𝑜̛̣𝑐 đ𝑖𝑒̂̀𝑢 ℎ𝑎̀𝑛ℎ 𝑏𝑜̛̉𝑖 𝑁𝑔𝑢𝑦𝑒̂̃𝑛 𝐻𝑎̉𝑖 Đ𝑎̆𝑛𝑔.\n[💟] Đ𝑎̂𝑦 𝐿𝑎̀ 𝑇𝑜𝑎̀𝑛 𝐵𝑜̣̂ 𝐿𝑒̣̂𝑛ℎ 𝐶𝑜́ 𝑇𝑟𝑜𝑛𝑔 𝐹𝑖𝑙𝑒 𝐵𝑜𝑡 UwU. [❗]\n🔰𝑉𝑢𝑖 𝐿𝑜̀𝑛𝑔 𝐾ℎ𝑜̂𝑛𝑔 𝑆𝑝𝑎𝑚 𝐻𝑜𝑎̣̆𝑐 𝐶ℎ𝑢̛̉𝑖 𝐵𝑜𝑡 𝐵𝑎̂́𝑡 𝐾𝑖̀ 𝐷𝑢̛𝑜̛́𝑖 𝐻𝑖̀𝑛ℎ 𝑇ℎ𝑢̛́𝑐 𝑁𝑎̀𝑜 𝑁ℎ𝑒́ [❗]\n📣ℍ𝕖𝕝𝕡 𝕤𝕖̃ 𝕥𝕦̛̣ đ𝕠̣̂𝕟𝕘 𝕘𝕠̛̃ 𝕤𝕒𝕦 𝟞𝟘𝕤 🏯🏯🏯',
-    "user": "Người dùng",
-        "adminGroup": "Quản trị viên nhóm",
-        "adminBot": "Quản trị viên bot"
-  },
-  "en": {
-    "moduleInfo": "「 %1 」\n%2\n\n❯ Usage: %3\n❯ Category: %4\n❯ Waiting time: %5 seconds(s)\n❯ Permission: %6\n\n» Module code by %7 «",
-    "helpList": '[ There are %1 commands on this bot, Use: "%2help nameCommand" to know how to use! ]',
-    "user": "User",
-        "adminGroup": "Admin group",
-        "adminBot": "Admin bot"
-  }
+    "vi": {},
+    "en": {}
 };
 
-module.exports.handleEvent = function ({ api, event, getText }) {
-  const { commands } = global.client;
-  const { threadID, messageID, body } = event;
+module.exports.run = async function ({ api, event, args }) {
+    const { commands } = global.client;
+    const { threadID: tid, messageID: mid } = event;
 
-  if (!body || typeof body == "undefined" || body.indexOf("help") != 0) return;
-  const splitBody = body.slice(body.indexOf("help")).trim().split(/\s+/);
-  if (splitBody.length == 1 || !commands.has(splitBody[1].toLowerCase())) return;
-  const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
-  const command = commands.get(splitBody[1].toLowerCase());
-  const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
-  return api.sendMessage(getText("moduleInfo", command.config.name, command.config.description, `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`, command.config.commandCategory, command.config.cooldowns, ((command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot")), command.config.credits), threadID, messageID);
-}
+    const moment = require("moment-timezone");
+    const timeNow = moment.tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY || HH:mm:ss");
 
-module.exports. run = function({ api, event, args, getText }) {
-  const { commands } = global.client;
-  const { threadID, messageID } = event;
-  const command = commands.get((args[0] || "").toLowerCase());
-  const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
-  const { autoUnsend, delayUnsend } = global.configModule[this.config.name];
-  const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
+    let type = args[0] ? args[0].toLowerCase() : "";
+    let msg = "", array = [], i = 0;
+    let prefix = global.config.PREFIX;
 
-  if (!command) {
-    const arrayInfo = [];
-    const page = parseInt(args[0]) || 1;
-    const numberOfOnePage = 10;
-    let i = 0;
-    let msg = "≻──── •𝐵𝑜𝑡• ────≺\n";
-
-    for (var [name, value] of (commands)) {
-      name += `\n⪼ Thuộc nhóm: ${value.config.commandCategory}\n⪼ Mô tả: ${value.config.description}\n⪼ Thời gian chờ: ${value.config.cooldowns}s`;
-      arrayInfo.push(name);
+    if (type === "all") {
+        for (const cmd of commands.values()) {
+            msg += `[${++i}]-> ${cmd.config.name}: ${cmd.config.description}\n-----------------------\n`;
+        }
+        return api.sendMessage(msg, tid, mid);
     }
 
-    arrayInfo.sort((a, b) => a.data - b.data);
+    if (type) {
+        for (const cmd of commands.values()) {
+            array.push(cmd.config.name.toString());
+        }
 
-    const startSlice = numberOfOnePage*page - numberOfOnePage;
-    i = startSlice;
-    const returnArray = arrayInfo.slice(startSlice, startSlice + numberOfOnePage);
+        if (!array.includes(type)) {
+            msg = `Không tìm thấy lệnh '${type}' trong hệ thống.`;
+            return api.sendMessage(msg, tid, mid);
+        }
 
-    for (let item of returnArray) msg += `⟬${++i}⟭• ${item}\n\n`;
-    const text = `◤______________________◥\n⊶ Trang (${page}/${Math.ceil(arrayInfo.length/numberOfOnePage)})\n⊶ Gõ: "${prefix}giupdo <tên lệnh>" để biết thêm chi tiết về lệnh đó\n⊶ Hiện tại có ${arrayInfo.length} lệnh có thể sử dụng\n⊶ Dùng ${prefix}giupdo <Số trang>`;
-    return api.sendMessage(msg + text, threadID, async (error, info) => {
-      if (autoUnsend) {
-        await new Promise(resolve => setTimeout(resolve, delayUnsend * 60000));
-        return api.unsendMessage(info.messageID);
-      } else return;
-    });
-  }
+        const cmd = commands.get(type).config;
+        msg = `[🧸] ➜ 𝗧𝗲̂𝗻: ${cmd.name} ( ${cmd.version} )\n` +
+              `[🔗] ➜ 𝗤𝘂𝘆𝗲̂̀𝗻 𝗵𝗮̣𝗻: ${TextPr(cmd.hasPermssion)}\n` +
+              `[👤] ➜ 𝗧𝗮́𝗰 𝗴𝗶𝗮̉: ${cmd.credits}\n` +
+              `[💬] ➜ 𝗠𝗼̂ 𝘁𝗮̉: ${cmd.description}\n` +
+              `[🧩] ➜ 𝗧𝗵𝘂𝗼̣̂𝗰 𝗻𝗵𝗼́𝗺: ${cmd.commandCategory}\n` +
+              `[🌟] ➜ 𝗖𝗮́𝗰𝗵 𝘀𝘂̛̉ 𝗱𝘂̣𝗻𝗴: ${cmd.usages}\n` +
+              `[⏰] ➜ 𝗧𝗵𝗼̛̀𝗶 𝗴𝗶𝗮𝗻 𝗰𝗵𝗼̛̀: ${cmd.cooldowns}s`;
 
-  return api.sendMessage(getText("moduleInfo", command.config.name, command.config.description, `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`, command.config.commandCategory, command.config.cooldowns, ((command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot")), command.config.credits), threadID, messageID);
+        return api.sendMessage(msg, tid, mid);
+    } else {
+        let categories = {};
+        for (const cmd of commands.values()) {
+            let cat = cmd.config.commandCategory;
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(cmd.config.name);
+        }
+
+        for (let cat in categories) {
+            msg += `[💝] ➜ 𝗡𝗵𝗼́𝗺: ${cat.toUpperCase()}\n[✨] ➜ 𝗟𝗲̣̂𝗻𝗵: ${categories[cat].join(", ")}\n\n`;
+        }
+
+        msg += `[🔗] ➜ 𝗦𝗼̂́ 𝗹𝗲̣̂𝗻𝗵 𝗵𝗶𝗲̣̂𝗻 𝘁𝗮̣𝗶: ${commands.size}\n` +
+               `[💜] ➜ 𝗗𝘂̀𝗻𝗴 "${prefix}help <tên lệnh>" để xem chi tiết.\n` +
+               `[💙] ➜ 𝗗𝘂̀𝗻𝗴 "${prefix}help all" để xem tất cả lệnh.\n\n` +
+               `⏰===『 ${timeNow} 』===⏰`;
+
+        // Sử dụng ảnh từ cache/dos.gif
+        return api.sendMessage({ 
+            body: msg, 
+            attachment: fs.createReadStream(__dirname + '/cache/dos.gif')
+        }, tid, mid);
+    }
 };
+
+module.exports.handleReaction = async ({ event, api, handleReaction }) => {
+    const { threadID, messageID, userID } = event;
+    if (userID !== handleReaction.author || event.reaction !== "❤") return;
+    api.unsendMessage(handleReaction.messageID);
+
+    const uptime = process.uptime();
+    const hours = Math.floor(uptime / (60 * 60));
+    const minutes = Math.floor((uptime % (60 * 60)) / 60);
+    const seconds = Math.floor(uptime % 60);
+
+    let msg = `===== [ 𝗧𝗛𝗢̂𝗡𝗚 𝗧𝗜𝗡 𝗕𝗢𝗧 ] =====\n\n` +
+              `[💮] ➜ 𝗢𝗻𝗹𝗶𝗻𝗲 đ𝘂̛𝗼̛̣𝗰 ${hours}𝗴 ${minutes}𝗽 ${seconds}𝘀\n` +
+              `[⚙️] ➜ 𝗣𝗵𝗶𝗲̂𝗻 𝗯𝗮̉𝗻: ${global.config.version}\n` +
+              `[🔗] ➜ 𝗧𝗼̂̉𝗻𝗴 𝗹𝗲̣̂𝗻𝗵: ${global.client.commands.size}\n` +
+              `[👥] ➜ 𝗧𝗼̂̉𝗻𝗴 𝗻𝗴𝘂̛𝗼̛̀𝗶 𝗱𝘂̀𝗻𝗴: ${global.data.allUserID.length}\n` +
+              `[🏘️] ➜ 𝗧𝗼̂̉𝗻𝗴 𝗻𝗵𝗼́𝗺: ${global.data.allThreadID.length}\n` +
+              `[💓] ➜ 𝗣𝗿𝗲𝗳𝗶𝘅: ${global.config.PREFIX}`;
+
+    return api.sendMessage({ 
+        body: msg, 
+        attachment: fs.createReadStream(__dirname + '/cache/dos.gif')
+    }, threadID);
+};
+
+function TextPr(permission) {
+    return permission === 0 ? "Thành Viên" :
+           permission === 1 ? "Quản trị viên" :
+           permission === 2 ? "ADMINBOT" : "Toàn Quyền";
+}

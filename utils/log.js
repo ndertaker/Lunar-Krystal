@@ -25,15 +25,15 @@ module.exports.loader = (data, option) => {
 
   switch (option) {
     case 'warn':
-      coloredData = gradient('#00FFFF', '#00FF33', '#FFCCFF', '#ed3491', '#0000FF', '#cb34ed', '#00FF00', '#347bed', '#00EE00').multiline('『 𝗞𝗿𝘆𝘀𝘁𝗮𝗹 』→' + data);
+      coloredData = gradient('#00FFFF', '#00FF33', '#FFCCFF', '#ed3491', '#0000FF', '#cb34ed', '#00FF00', '#347bed', '#00EE00').multiline('『 v 』→' + data);
       console.log(chalk.bold(coloredData));
       break;
     case 'error':
-      coloredData = chalk.bold.hex('#00FFFF')('『 𝗞𝗿𝘆𝘀𝘁𝗮𝗹 』→') + chalk.bold.red(data);
+      coloredData = chalk.bold.hex('#00FFFF')('『 v 』→') + chalk.bold.red(data);
       console.log(coloredData);
       break;
     default:
-      coloredData = gradient('#00FFFF', '#cb34ed', '#347bed', '#3366FF', '#FF3366', '#0000FF', '#00DD00').multiline('『 𝗞𝗿𝘆𝘀𝘁𝗮𝗹 』→ ' + data);
+      coloredData = gradient('#00FFFF', '#cb34ed', '#347bed', '#3366FF', '#FF3366', '#0000FF', '#00DD00').multiline('『 v 』→ ' + data);
       console.log(chalk.bold(coloredData));
       break;
   }
