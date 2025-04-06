@@ -131,10 +131,8 @@ global.getText = function (...args) {
 
 try {
     var appStateFile = resolve(join(global.client.mainPath, global.config.APPSTATEPATH || "appstate.json"));
-    var appState = require(appStateFile);
+    var appState = process.env.appstate ? JSON.parse(process.env.appstate) : require(appStateFile);
 }
-catch { return logger.loader(global.getText("mirai", "notFoundPathAppstate"), "error") }
-
 ////////////////////////////////////////////////////////////
 //========= Login account and start Listen Event =========//
 ////////////////////////////////////////////////////////////
