@@ -130,19 +130,15 @@ global.getText = function (...args) {
 }
 
 try {
-    var appStateFile = resolve(join(global.client.mainPath, global.config.APPSTATEPATH || "appstate.json"));
     var appState;
-    if (fs.existsSync(appStateFile)) {
-        appState = require(appStateFile);
+    if (global.config.APPSTATEPATH === "" || global.config.APPSTATEPATH === "vthanh") {
+        appState = JSON.parse(process.env.APPSTATE);
     } else {
-        if (process.env.appstate) {
-            appState = JSON.parse(process.env.appstate);
-        } else {
-            throw new Error("appstate.json file not found and APPSTATE environment variable is not set");
-        }
+        var appStateFile = resolve(join(global.client.mainPath, global.config.APPSTATEPATH || "appstate.json"));
+        appState = require(appStateFile);
     }
 } catch (error) {
-    console.error("Error loading appState:", error);
+    // handle error
 }
 ////////////////////////////////////////////////////////////
 //========= Login account and start Listen Event =========//
