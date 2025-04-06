@@ -9,7 +9,7 @@ const path = require('path');
 ///////////////////////////////////////////////////////////
 //========= Create website for dashboard/uptime =========//
 ///////////////////////////////////////////////////////////
-const PORT = process.env.PORT || 2025;
+const PORT = process.env.PORT || 10000;
 const express = require("express");
 const app = express();
 
