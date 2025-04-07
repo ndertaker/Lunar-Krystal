@@ -1,110 +1,55 @@
-const fs = require('fs'); // Thêm dòng này để import fs
-
 module.exports.config = {
-    name: "help",
-    version: "1.1.1",
-    hasPermssion: 0,
-    credits: "DC-Nam", // mod lại by táo táo
-    description: "Xem danh sách lệnh và info",
-    commandCategory: "Danh sách lệnh",
-    usages: "[tên lệnh/all]",
-    cooldowns: 5
+	name: "help",
+	version: "1.0.2",
+	hasPermssion: 0,
+	credits: "Mirai Team & Update by DuyVuong",
+	description: "Hướng dẫn cho người mới",
+	commandCategory: "system",
+	usages: "[Tên module]",
+	cooldowns: 5
 };
 
-module.exports.languages = {
-    "vi": {},
-    "en": {}
-};
+module.exports.handleEvent = function ({ api, event }) {
+	const { commands } = global.client;
+	
+	if (!event.body) return;
 
-module.exports.run = async function ({ api, event, args }) {
-    const { commands } = global.client;
-    const { threadID: tid, messageID: mid } = event;
+	const { threadID, messageID, body } = event;
 
-    const moment = require("moment-timezone");
-    const timeNow = moment.tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY || HH:mm:ss");
+	if (body.indexOf("help") != 0) return;
 
-    let type = args[0] ? args[0].toLowerCase() : "";
-    let msg = "", array = [], i = 0;
-    let prefix = global.config.PREFIX;
+	const splitBody = body.slice(body.indexOf("help")).trim().split(/\s+/);
 
-    if (type === "all") {
-        for (const cmd of commands.values()) {
-            msg += `[${++i}]-> ${cmd.config.name}: ${cmd.config.description}\n-----------------------\n`;
-        }
-        return api.sendMessage(msg, tid, mid);
-    }
 
-    if (type) {
-        for (const cmd of commands.values()) {
-            array.push(cmd.config.name.toString());
-        }
+	if (splitBody.length == 1 || !commands.has(splitBody[1].toLowerCase())) return;
 
-        if (!array.includes(type)) {
-            msg = `Không tìm thấy lệnh '${type}' trong hệ thống.`;
-            return api.sendMessage(msg, tid, mid);
-        }
+	const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
+	const command = commands.get(splitBody[1].toLowerCase());
 
-        const cmd = commands.get(type).config;
-        msg = `[🧸] ➜ 𝗧𝗲̂𝗻: ${cmd.name} ( ${cmd.version} )\n` +
-              `[🔗] ➜ 𝗤𝘂𝘆𝗲̂̀𝗻 𝗵𝗮̣𝗻: ${TextPr(cmd.hasPermssion)}\n` +
-              `[👤] ➜ 𝗧𝗮́𝗰 𝗴𝗶𝗮̉: ${cmd.credits}\n` +
-              `[💬] ➜ 𝗠𝗼̂ 𝘁𝗮̉: ${cmd.description}\n` +
-              `[🧩] ➜ 𝗧𝗵𝘂𝗼̣̂𝗰 𝗻𝗵𝗼́𝗺: ${cmd.commandCategory}\n` +
-              `[🌟] ➜ 𝗖𝗮́𝗰𝗵 𝘀𝘂̛̉ 𝗱𝘂̣𝗻𝗴: ${cmd.usages}\n` +
-              `[⏰] ➜ 𝗧𝗵𝗼̛̀𝗶 𝗴𝗶𝗮𝗻 𝗰𝗵𝗼̛̀: ${cmd.cooldowns}s`;
+	const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
 
-        return api.sendMessage(msg, tid, mid);
-    } else {
-        let categories = {};
-        for (const cmd of commands.values()) {
-            let cat = cmd.config.commandCategory;
-            if (!categories[cat]) categories[cat] = [];
-            categories[cat].push(cmd.config.name);
-        }
+	return api.sendMessage(`⚔ ${command.config.name} ⚔\n${command.config.description}\n\n❯ Cách sử dụng: ${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}\n❯ Thuộc nhóm: ${command.config.commandCategory}\n❯ Thời gian chờ: ${command.config.cooldowns} giây(s)\n❯ Quyền hạn: ${((command.config.hasPermssion == 0) ? "Người dùng" : (command.config.hasPermssion == 1) ? "Quản trị viên" : "Người vận hành bot" )}\n❯ Prefix: ${prefix}\n\n»  bot lord«`, threadID, messageID);
+}
 
-        for (let cat in categories) {
-            msg += `[💝] ➜ 𝗡𝗵𝗼́𝗺: ${cat.toUpperCase()}\n[✨] ➜ 𝗟𝗲̣̂𝗻𝗵: ${categories[cat].join(", ")}\n\n`;
-        }
+module.exports.run = function({ api, event, args }) {
+	const { commands } = global.client;
+	const { threadID, messageID } = event;
+	const command = commands.get((args[0] || "").toLowerCase());
+	const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
+	
+	if (!command) {
+		const command = commands.values();
+		var group = [], msg = "";
+		for (const commandConfig of command) {
+			if (!group.some(item => item.group.toLowerCase() == commandConfig.config.commandCategory.toLowerCase())) group.push({ group: commandConfig.config.commandCategory.toLowerCase(), cmds: [commandConfig.config.name] });
+			else group.find(item => item.group.toLowerCase() == commandConfig.config.commandCategory.toLowerCase()).cmds.push(commandConfig.config.name);
+		}
+        group.forEach(commandGroup => msg += `⛩️🌸 ${commandGroup.group.charAt(0).toUpperCase() + commandGroup.group.slice(1)} 🌸🌸\n${commandGroup.cmds.join(', ')}\n\n`);
+		return api.sendMessage(msg + `🌸Sử dụng: "${(threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX}help lệnh" để xem chi tiết 🌸\n\n⛩️ Hiện tại đang có ${commands.size} lệnh 🌸\n\n🌸 Nếu có lỗi có thể /callad + lỗi bạn gặp phải 🌸\n\n⛩️ Sau 2 phút help tự động gỡ! 🌸\n\n⛩️ ADMIN: Bùi Xuân Lâm + Ngô Đức Duy 🌸`, threadID, (err, info) => setTimeout(() => api.unsendMessage(info.messageID), 120000),messageID);
 
-        msg += `[🔗] ➜ 𝗦𝗼̂́ 𝗹𝗲̣̂𝗻𝗵 𝗵𝗶𝗲̣̂𝗻 𝘁𝗮̣𝗶: ${commands.size}\n` +
-               `[💜] ➜ 𝗗𝘂̀𝗻𝗴 "${prefix}help <tên lệnh>" để xem chi tiết.\n` +
-               `[💙] ➜ 𝗗𝘂̀𝗻𝗴 "${prefix}help all" để xem tất cả lệnh.\n\n` +
-               `⏰===『 ${timeNow} 』===⏰`;
+	}
 
-        // Sử dụng ảnh từ cache/dos.gif
-        return api.sendMessage({ 
-            body: msg, 
-            attachment: fs.createReadStream(__dirname + '/cache/dos.gif')
-        }, tid, mid);
-    }
-};
+	const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
 
-module.exports.handleReaction = async ({ event, api, handleReaction }) => {
-    const { threadID, messageID, userID } = event;
-    if (userID !== handleReaction.author || event.reaction !== "❤") return;
-    api.unsendMessage(handleReaction.messageID);
-
-    const uptime = process.uptime();
-    const hours = Math.floor(uptime / (60 * 60));
-    const minutes = Math.floor((uptime % (60 * 60)) / 60);
-    const seconds = Math.floor(uptime % 60);
-
-    let msg = `===== [ 𝗧𝗛𝗢̂𝗡𝗚 𝗧𝗜𝗡 𝗕𝗢𝗧 ] =====\n\n` +
-              `[💮] ➜ 𝗢𝗻𝗹𝗶𝗻𝗲 đ𝘂̛𝗼̛̣𝗰 ${hours}𝗴 ${minutes}𝗽 ${seconds}𝘀\n` +
-              `[⚙️] ➜ 𝗣𝗵𝗶𝗲̂𝗻 𝗯𝗮̉𝗻: ${global.config.version}\n` +
-              `[🔗] ➜ 𝗧𝗼̂̉𝗻𝗴 𝗹𝗲̣̂𝗻𝗵: ${global.client.commands.size}\n` +
-              `[👥] ➜ 𝗧𝗼̂̉𝗻𝗴 𝗻𝗴𝘂̛𝗼̛̀𝗶 𝗱𝘂̀𝗻𝗴: ${global.data.allUserID.length}\n` +
-              `[🏘️] ➜ 𝗧𝗼̂̉𝗻𝗴 𝗻𝗵𝗼́𝗺: ${global.data.allThreadID.length}\n` +
-              `[💓] ➜ 𝗣𝗿𝗲𝗳𝗶𝘅: ${global.config.PREFIX}`;
-
-    return api.sendMessage({ 
-        body: msg, 
-        attachment: fs.createReadStream(__dirname + '/cache/dos.gif')
-    }, threadID);
-};
-
-function TextPr(permission) {
-    return permission === 0 ? "Thành Viên" :
-           permission === 1 ? "Quản trị viên" :
-           permission === 2 ? "ADMINBOT" : "Toàn Quyền";
+	return api.sendMessage(`⛩️🌸 ${command.config.name} 🌸🌸\n${command.config.description}\n\n❯ Cách sử dụng: ${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}\n❯ Thuộc nhóm: ${command.config.commandCategory}\n❯ Thời gian chờ: ${command.config.cooldowns} giây(s)\n❯ Quyền hạn: ${((command.config.hasPermssion == 0) ? "Người dùng" : (command.config.hasPermssion == 1) ? "Quản trị viên" : "Người vận hành bot" )}\n❯ Prefix: ${prefix}\n\n»  bot lord«`, threadID, messageID);
 }

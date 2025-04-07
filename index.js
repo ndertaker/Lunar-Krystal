@@ -23,30 +23,48 @@ app.listen(PORT, () => {
     console.log(`[ SECURITY ] -> Máy chủ khởi động tại port: ${PORT}`);
 });
 
+function startBot(message, restartLimit = 5) {
+    // Ghi log nếu có message
+    if (message) {
+        logger(message, "BOT STARTING");
+    }
 
-function startBot(message) {
-    (message) ? logger(message, "BOT STARTING") : "";
-
+    // Khởi chạy tiến trình con
     const child = spawn("node", ["--trace-warnings", "--async-stack-traces", "main.js"], {
         cwd: __dirname,
         stdio: "inherit",
         shell: true
     });
 
-   child.on("close",async (codeExit) => {
-      var x = 'codeExit'.replace('codeExit',codeExit);
-        if (codeExit == 1) return startBot("Đang Khởi Động Lại, Vui Lòng Chờ ...");
-         else if (x.indexOf(2) == 0) {
-           await new Promise(resolve => setTimeout(resolve, parseInt(x.replace(2,'')) * 1000));
-                 startBot("Bot has been activated please wait a moment!!!");
-       }
-         else return; 
+    // Biến đếm số lần khởi động lại để tránh vòng lặp vô hạn
+    let restartCount = 0;
+
+    child.on("close", async (codeExit) => {
+        console.log(`Bot exited with code: ${codeExit}`);
+
+        if (codeExit === 1) {
+            if (restartCount < restartLimit) {
+                restartCount++;
+                console.log(`Restarting bot (${restartCount}/${restartLimit})...`);
+                startBot("Đang Khởi Động Lại, Vui Lòng Chờ ...");
+            } else {
+                console.error("Max restart limit reached. Bot will not restart.");
+            }
+        } else if (String(codeExit).startsWith("2")) {
+            const delaySeconds = parseInt(String(codeExit).substring(1)) || 1; // Mặc định 1 giây nếu không parse được
+            const delayMs = delaySeconds * 1000;
+            console.log(`Bot will restart after ${delaySeconds} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+            startBot("Bot has been activated, please wait a moment!!!");
+        }
+        // Các mã thoát khác không cần xử lý, bot dừng lại
     });
 
-    child.on("error", function (error) {
-        logger("An error occurred: " + JSON.stringify(error), "[ Starting ]");
+    // Xử lý lỗi không mong muốn
+    child.on("error", (err) => {
+        console.error("Bot failed to start:", err.message);
     });
-};
+}
 
 axios.get("https://raw.githubusercontent.com/tandung1/Bot12/main/package.json").then((res) => {})
 startBot()
