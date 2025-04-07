@@ -130,10 +130,6 @@ global.getText = function (...args) {
 }
 
 try {
-<<<<<<< HEAD
-    var appStateFile = resolve(join(global.client.mainPath, global.config.APPSTATEPATH || "appstate.json"));
-    var appState = process.env.appstate ? JSON.parse(process.env.appstate) : require(appStateFile);
-=======
     var appState;
     if (global.config.APPSTATEPATH === "" || global.config.APPSTATEPATH === "vthanh") {
         appState = JSON.parse(process.env.APPSTATE);
@@ -143,7 +139,6 @@ try {
     }
 } catch (error) {
     // handle error
->>>>>>> 440a957c246b67be06045ce9b87ae1e4568b004c
 }
 ////////////////////////////////////////////////////////////
 //========= Login account and start Listen Event =========//

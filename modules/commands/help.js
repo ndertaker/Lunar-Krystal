@@ -45,7 +45,7 @@ module.exports.run = function({ api, event, args }) {
 			else group.find(item => item.group.toLowerCase() == commandConfig.config.commandCategory.toLowerCase()).cmds.push(commandConfig.config.name);
 		}
         group.forEach(commandGroup => msg += `⛩️🌸 ${commandGroup.group.charAt(0).toUpperCase() + commandGroup.group.slice(1)} 🌸🌸\n${commandGroup.cmds.join(', ')}\n\n`);
-		return api.sendMessage(msg + `🌸Sử dụng: "${(threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX}help lệnh" để xem chi tiết 🌸\n\n⛩️ Hiện tại đang có ${commands.size} lệnh 🌸\n\n🌸 Nếu có lỗi có thể /callad + lỗi bạn gặp phải 🌸\n\n⛩️ Sau 2 phút help tự động gỡ! 🌸\n\n⛩️ ADMIN: Bùi Xuân Lâm + Ngô Đức Duy 🌸`, threadID, (err, info) => setTimeout(() => api.unsendMessage(info.messageID), 120000),messageID);
+		return api.sendMessage(msg + `🌸Sử dụng: "${(threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX}help lệnh" để xem chi tiết 🌸\n\n⛩️ Hiện tại đang có ${commands.size} lệnh 🌸\n\n🌸 Nếu có lỗi có thể /callad + lỗi bạn gặp phải 🌸\n\n⛩️ Sau 2 phút help tự động gỡ! 🌸\n\n⛩️ Thanks for using !!! 🌸`, threadID, (err, info) => setTimeout(() => api.unsendMessage(info.messageID), 120000),messageID);
 
 	}
 
